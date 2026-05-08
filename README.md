@@ -92,43 +92,84 @@ lessons/       — 公開レッスン（storeId + date でクエリ）
 adjustments/   — 合同レッスン調整（storeId + status でクエリ）
 ```
 
-## Railway デプロイ
+## Railway デプロイ（Railway CLI）
 
-### 手順
+GitHub 連携なしで、ローカルから直接 Railway にデプロイします。
 
-1. [Railway](https://railway.app) でプロジェクトを作成
-2. GitHub リポジトリを連携（または `railway up` でローカルからデプロイ）
-3. Railway ダッシュボードの **Variables** タブで以下の環境変数を設定
-
-### 必須環境変数
-
-| 変数名 | 内容 |
-|--------|------|
-| `ADMIN_PASSWORD_SUPER` | 全体管理者パスワード |
-| `ADMIN_PASSWORD_STORE` | 店舗管理者パスワード |
-| `FIREBASE_PROJECT_ID` | Firebase プロジェクト ID |
-| `FIREBASE_CLIENT_EMAIL` | サービスアカウントのメールアドレス |
-| `FIREBASE_PRIVATE_KEY` | サービスアカウントの秘密鍵（`\n` エスケープ済み） |
-
-`PORT` は Railway が自動設定するため手動設定不要です。
-
-### 注意事項
-
-Railway のファイルシステムはデプロイのたびにリセットされます。
-Firestore を環境変数で設定することでデータが永続化されます。
-
-## Firebase Hosting デプロイ
+### 1. Railway CLI インストール（初回のみ）
 
 ```bash
-# Firebase CLI をインストール（初回のみ）
-npm install -g firebase-tools
-
-# ログイン
-firebase login
-
-# .firebaserc のプロジェクトIDを設定してからデプロイ
-firebase deploy
+npm install -g @railway/cli
 ```
+
+### 2. ログイン
+
+```bash
+railway login
+```
+
+ブラウザが開くので Railway アカウントで認証します。
+
+### 3. プロジェクト作成・紐付け
+
+```bash
+railway init
+```
+
+対話式プロンプトで新規プロジェクトを作成します（プロジェクト名は任意）。
+
+### 4. Firebase 認証情報を Railway に設定
+
+付属のスクリプトが `firebase-key.json` から自動で設定します：
+
+```bash
+node scripts/set-railway-env.js
+```
+
+続けて管理者パスワードを設定します：
+
+```bash
+railway variables set ADMIN_PASSWORD_SUPER="パスワード"
+railway variables set ADMIN_PASSWORD_STORE="パスワード"
+```
+
+### 5. デプロイ
+
+```bash
+railway up
+```
+
+デプロイ完了後、Railway CLI が URL を表示します（例: `https://lesson-app-xxxx.up.railway.app`）。
+
+---
+
+### 以降のデプロイ（コード変更時）
+
+```bash
+railway up
+```
+
+### 環境変数の確認・変更
+
+```bash
+# 設定済み変数を一覧表示
+railway variables
+
+# 変数を追加・更新
+railway variables set KEY="VALUE"
+```
+
+### 必須環境変数まとめ
+
+| 変数名 | 設定方法 |
+|--------|---------|
+| `FIREBASE_PROJECT_ID` | `set-railway-env.js` が自動設定 |
+| `FIREBASE_CLIENT_EMAIL` | `set-railway-env.js` が自動設定 |
+| `FIREBASE_PRIVATE_KEY` | `set-railway-env.js` が自動設定 |
+| `ADMIN_PASSWORD_SUPER` | 手動で `railway variables set` |
+| `ADMIN_PASSWORD_STORE` | 手動で `railway variables set` |
+
+`PORT` は Railway が自動設定するため不要です。
 
 - **Hosting** — `public/` の静的ファイルを配信
 - **Cloud Functions** — `/api/**` のリクエストを Express アプリで処理
