@@ -256,14 +256,18 @@ const initPromise = (async () => {
   if (ok) await storage.seedAll();
 })();
 
-// ── Firebase Cloud Functions export ──────────────────────
+// ── Firebase Cloud Functions export (Gen2) ───────────────
 // Used when deploying via: firebase deploy
+// Region: asia-northeast1 (Tokyo) for low latency
 try {
-  const functions = require('firebase-functions');
-  module.exports.app = functions.https.onRequest(async (req, res) => {
-    await initPromise;
-    return app(req, res);
-  });
+  const { onRequest } = require('firebase-functions/v2/https');
+  module.exports.app = onRequest(
+    { region: 'asia-northeast1' },
+    async (req, res) => {
+      await initPromise;
+      return app(req, res);
+    }
+  );
 } catch (_) {
   // firebase-functions not available — running locally or on Railway
 }

@@ -7,7 +7,8 @@ let db = null;
 async function connect() {
   const keyPath            = process.env.FIREBASE_KEY_PATH;
   const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  const projectId          = process.env.FIREBASE_PROJECT_ID;
+  // GCLOUD_PROJECT is automatically set on Cloud Functions / Cloud Run (ADC applies)
+  const projectId          = process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT;
   const clientEmail        = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey         = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 

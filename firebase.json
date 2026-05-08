@@ -9,7 +9,10 @@
     "rewrites": [
       {
         "source": "/api/**",
-        "function": "app"
+        "run": {
+          "serviceId": "app",
+          "region": "asia-northeast1"
+        }
       },
       {
         "source": "**",
@@ -25,7 +28,10 @@
       ".git",
       "*.log",
       "data",
-      "public"
+      "public",
+      "firebase-key.json",
+      ".env",
+      ".env.*"
     ]
   }
 }
