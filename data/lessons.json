@@ -1,0 +1,55 @@
+[
+  {
+    "id": "lesson_ca2b0de4",
+    "participants": [],
+    "createdAt": "2026-05-07T11:46:04.878Z",
+    "typeId": "lt01",
+    "date": "2026-05-15",
+    "capacity": 10,
+    "deadline": "1month",
+    "memo": "",
+    "instructorId": "u01",
+    "storeId": "s01",
+    "tempInstructorId": null
+  },
+  {
+    "id": "lesson_2d847b90",
+    "participants": [],
+    "createdAt": "2026-05-07T11:46:54.879Z",
+    "typeId": "lt01",
+    "date": "2026-05-22",
+    "capacity": 5,
+    "deadline": "1day",
+    "memo": "",
+    "instructorId": "u01",
+    "storeId": "s01",
+    "tempInstructorId": null
+  },
+  {
+    "id": "lesson_a33cb66b",
+    "participants": [],
+    "createdAt": "2026-05-07T16:00:33.607Z",
+    "typeId": "lt01",
+    "date": "2026-05-31",
+    "capacity": 6,
+    "deadline": "1day",
+    "instructorId": "u01",
+    "storeId": "s01",
+    "tempInstructorId": null,
+    "memo": "カットレッスン",
+    "adjId": "adj_1dfc672c"
+  },
+  {
+    "id": "lesson_b1354e5a",
+    "participants": [],
+    "createdAt": "2026-05-07T16:19:24.733Z",
+    "typeId": "lt02",
+    "date": "2026-05-31",
+    "capacity": 5,
+    "deadline": "1day",
+    "memo": "",
+    "instructorId": "u02",
+    "storeId": "s01",
+    "tempInstructorId": null
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {"id": "lt01", "name": "カット基礎", "format": "個別", "duration": 60, "level": "初級"},
+  {"id": "lt02", "name": "カラーリング", "format": "グループ", "duration": 90, "level": "中級"},
+  {"id": "lt03", "name": "パーマ技術", "format": "グループ", "duration": 120, "level": "上級"},
+  {"id": "lt04", "name": "スタイリング", "format": "個別", "duration": 60, "level": "初級"},
+  {"id": "lt05", "name": "接客マナー", "format": "グループ", "duration": 60, "level": "全レベル"}
+]

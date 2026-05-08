@@ -1,0 +1,163 @@
+[
+  {
+    "id": "u01",
+    "name": "田中 美咲",
+    "role": "instructor",
+    "storeId": "s01",
+    "adminRole": "super_admin"
+  },
+  {
+    "id": "u02",
+    "name": "鈴木 花子",
+    "role": "instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u03",
+    "name": "佐藤 雪",
+    "role": "instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u04",
+    "name": "高橋 陽菜",
+    "role": "instructor",
+    "storeId": "s01",
+    "adminRole": "store_admin"
+  },
+  {
+    "id": "u05",
+    "name": "伊藤 結衣",
+    "role": "instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u06",
+    "name": "渡辺 愛",
+    "role": "temp_instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u07",
+    "name": "中村 律",
+    "role": "temp_instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u08",
+    "name": "小林 凛",
+    "role": "temp_instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u09",
+    "name": "加藤 詩",
+    "role": "temp_instructor",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u10",
+    "name": "山田 はる",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u11",
+    "name": "松本 栞",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u12",
+    "name": "井上 莉子",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u13",
+    "name": "木村 凪",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u14",
+    "name": "林 葵",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u15",
+    "name": "清水 心春",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u16",
+    "name": "山口 朱里",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u17",
+    "name": "池田 由奈",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u18",
+    "name": "橋本 真央",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u19",
+    "name": "阿部 美月",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u20",
+    "name": "福田 さくら",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u21",
+    "name": "岡田 千尋",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "u22",
+    "name": "長谷川 楓",
+    "role": "participant",
+    "storeId": "s01",
+    "adminRole": null
+  },
+  {
+    "id": "user_5920cc03",
+    "name": "みや",
+    "role": "instructor",
+    "storeId": "store_5c19ca33",
+    "adminRole": null
+  }
+]
