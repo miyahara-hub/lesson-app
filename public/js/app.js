@@ -3,7 +3,7 @@
    ============================================================ */
 
 // ── CONSTANTS ─────────────────────────────────────────────
-const API = '/api';
+const API = (window.__API_BASE__ || '') + '/api';
 const DEADLINE_OPTS = [
   { value: '1day',   label: '前日' },
   { value: '3days',  label: '3日前' },

@@ -15,6 +15,13 @@
     </div>
   </div>
   <div id="toast-container"></div>
+  <!--
+    バックエンドURL設定
+    ・ローカル開発: '' のまま（同一オリジンの /api を使用）
+    ・Firebase Hosting デプロイ時: Railway の URL に変更してから firebase deploy
+      例: window.__API_BASE__ = 'https://lesson-app-xxxx.up.railway.app';
+  -->
+  <script>window.__API_BASE__ = '';</script>
   <script src="/js/app.js"></script>
 </body>
 </html>

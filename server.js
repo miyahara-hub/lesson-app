@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { connect } = require('./db/connection');
@@ -8,6 +9,25 @@ const { arrayUnion, arrayRemove } = storage;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// CORS: allow Firebase Hosting, Railway, and localhost
+const CORS_ALLOWED = [
+  /^http:\/\/localhost/,
+  /\.web\.app$/,
+  /\.firebaseapp\.com$/,
+  /\.up\.railway\.app$/,
+  /\.onrender\.com$/,
+];
+if (process.env.CORS_ORIGIN) {
+  CORS_ALLOWED.push(new RegExp(process.env.CORS_ORIGIN));
+}
+app.use(cors({
+  origin(origin, cb) {
+    if (!origin || CORS_ALLOWED.some(re => re.test(origin))) return cb(null, true);
+    cb(new Error(`CORS: ${origin} not allowed`));
+  },
+  credentials: true,
+}));
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
