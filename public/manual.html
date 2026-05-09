@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>LESSON — 使い方ガイド</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:  #111;
+      --white:  #fff;
+      --accent: #888;
+      --border: #e0e0e0;
+      --bg-sub: #f7f7f7;
+      --danger: #b04040;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      background: var(--white);
+      color: var(--black);
+      font-size: 14px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      background: var(--black);
+      color: var(--white);
+      text-align: center;
+      padding: 36px 24px 28px;
+    }
+    .site-header .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      letter-spacing: 0.25em;
+      font-weight: 400;
+    }
+    .site-header .sub {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-top: 6px;
+    }
+    .site-header .guide-label {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ── TAB NAV ── */
+    .tab-nav {
+      display: flex;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 14px 8px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.3;
+    }
+    .tab-btn.active {
+      color: var(--black);
+      border-bottom-color: var(--black);
+    }
+    .tab-btn span {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-top: 2px;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+
+    /* ── PAGE INTRO ── */
+    .part-intro {
+      padding: 32px 24px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .part-label {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .part-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 400;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .part-desc {
+      font-size: 13px;
+      color: var(--accent);
+      line-height: 1.8;
+      padding-bottom: 20px;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      padding: 24px 24px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .toc-label {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .toc-list {
+      list-style: none;
+    }
+    .toc-list li {
+      border-top: 1px solid var(--border);
+    }
+    .toc-list li:first-child {
+      border-top: none;
+    }
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      text-decoration: none;
+      color: var(--black);
+      font-size: 13px;
+    }
+    .toc-list a::after {
+      content: '›';
+      color: var(--accent);
+      font-size: 18px;
+      line-height: 1;
+    }
+    .toc-num {
+      font-size: 10px;
+      color: var(--accent);
+      margin-right: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── CHAPTER ── */
+    .chapter {
+      padding: 36px 24px 0;
+    }
+    .chapter + .chapter {
+      border-top: 1px solid var(--border);
+    }
+    .chapter-num {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .chapter-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* ── STEPS ── */
+    .steps {
+      list-style: none;
+      counter-reset: step-counter;
+    }
+    .step {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border);
+      counter-increment: step-counter;
+    }
+    .step:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--black);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 400;
+      margin-top: 1px;
+    }
+    .step-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .step-title {
+      font-size: 13px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 12px;
+      color: var(--accent);
+      line-height: 1.7;
+    }
+
+    /* ── INFO CARDS ── */
+    .info-card {
+      background: var(--bg-sub);
+      padding: 16px 18px;
+      margin: 20px 0;
+      border-left: 2px solid var(--black);
+    }
+    .info-card-title {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+    .info-card p {
+      font-size: 12px;
+      color: var(--accent);
+      line-height: 1.7;
+    }
+    .info-card p + p {
+      margin-top: 4px;
+    }
+
+    .note-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      margin: 16px 0;
+    }
+    .note-card p {
+      font-size: 12px;
+      color: var(--accent);
+      line-height: 1.7;
+    }
+
+    .warn-card {
+      background: var(--white);
+      border: 1px solid var(--danger);
+      padding: 14px 16px;
+      margin: 16px 0;
+    }
+    .warn-card p {
+      font-size: 12px;
+      color: var(--danger);
+      line-height: 1.7;
+    }
+
+    /* ── BADGE-LIKE LABELS ── */
+    .badge {
+      display: inline-block;
+      border: 1px solid var(--black);
+      font-size: 10px;
+      padding: 2px 8px;
+      letter-spacing: 0.05em;
+      vertical-align: middle;
+    }
+    .badge-accent {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .badge-dark {
+      background: var(--black);
+      color: var(--white);
+    }
+    .badge-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ── BUTTON DEMO ── */
+    .btn-demo {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 6px 16px;
+      border: 1px solid var(--black);
+      background: var(--black);
+      color: var(--white);
+      border-radius: 2px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      vertical-align: middle;
+    }
+    .btn-demo-ghost {
+      background: var(--white);
+      color: var(--black);
+    }
+    .btn-demo-danger {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+
+    /* ── TAB TABLE (admin tabs) ── */
+    .admin-tabs-demo {
+      display: flex;
+      border: 1px solid var(--border);
+      margin: 16px 0;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+    .admin-tab-demo {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 11px;
+      color: var(--accent);
+      border-right: 1px solid var(--border);
+    }
+    .admin-tab-demo:last-child { border-right: none; }
+    .admin-tab-demo.active {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    /* ── PATTERN CARDS ── */
+    .pattern-row {
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .pattern-card {
+      flex: 1;
+      border: 1px solid var(--border);
+      padding: 14px 12px;
+    }
+    .pattern-card.active {
+      border-color: var(--black);
+    }
+    .pattern-letter {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .pattern-desc {
+      font-size: 11px;
+      color: var(--accent);
+      line-height: 1.6;
+    }
+
+    /* ── STATUS LIST ── */
+    .status-list {
+      list-style: none;
+      margin: 12px 0;
+    }
+    .status-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .status-list li:first-child { border-top: none; }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0 0;
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      padding: 40px 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .site-footer p {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── ICON SVG ── */
+    .icon {
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 16px 0;
+    }
+    .flow-step {
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 2px;
+    }
+    .flow-arrow {
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    /* ── UTIL ── */
+    .mt-8  { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mb-24 { margin-bottom: 24px; }
+    .text-accent { color: var(--accent); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ HEADER -->
+<header class="site-header">
+  <div class="logo">LESSON</div>
+  <div class="sub">Salon Schedule Manager</div>
+  <div class="guide-label">使い方ガイド</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════ TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showSection('part1', this)">
+    参加者向け
+    <span>ASSISTANT</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('part2', this)">
+    スタイリスト・管理者向け
+    <span>STYLIST / ADMIN</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════ PART 1: 参加者 -->
+<section id="part1" class="section active">
+
+  <div class="part-intro">
+    <p class="part-label">Part 1 — Assistant</p>
+    <h1 class="part-title">レッスンの<br>参加方法</h1>
+    <p class="part-desc">
+      アシスタントの方向けのガイドです。<br>
+      レッスンへの参加申し込みから、合同レッスンの日程調整までを説明します。
+    </p>
+  </div>
+
+  <!-- 目次 -->
+  <div class="toc">
+    <p class="toc-label">Contents</p>
+    <ul class="toc-list">
+      <li><a href="#p1-login"><span class="toc-num">01</span>ログイン方法</a></li>
+      <li><a href="#p1-list"><span class="toc-num">02</span>レッスン一覧の見方</a></li>
+      <li><a href="#p1-register"><span class="toc-num">03</span>レッスンに参加申し込みする</a></li>
+      <li><a href="#p1-cancel"><span class="toc-num">04</span>申し込みをキャンセルする</a></li>
+      <li><a href="#p1-gcal"><span class="toc-num">05</span>Google カレンダーに追加する</a></li>
+      <li><a href="#p1-adjust"><span class="toc-num">06</span>合同レッスン調整に参加する</a></li>
+    </ul>
+  </div>
+
+
+  <!-- 01 ログイン -->
+  <div class="chapter" id="p1-login">
+    <p class="chapter-num">01 — Login</p>
+    <h2 class="chapter-title">ログイン方法</h2>
+
+    <div class="flow">
+      <div class="flow-step">URL にアクセス</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">店舗を選ぶ</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">名前をタップ</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">ホーム画面</div>
+    </div>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">URL にアクセスする</p>
+          <p class="step-desc">ブラウザで tasty lesson の URL を開きます。ブックマーク登録しておくと便利です。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">店舗を選ぶ</p>
+          <p class="step-desc">自分が所属する店舗をタップします。複数店舗のレッスンをまとめて見たい場合は「全店舗」を選びます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">自分の名前をタップする</p>
+          <p class="step-desc">「アシスタント」グループから自分の名前を選びます。パスワードは不要です。</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note-card">
+      <p>ログアウトするにはホーム画面右上の
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        アイコンをタップしてください。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 02 レッスン一覧 -->
+  <div class="chapter" id="p1-list">
+    <p class="chapter-num">02 — Lesson Schedule</p>
+    <h2 class="chapter-title">レッスン一覧の見方</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「レッスン一覧」をタップする</p>
+          <p class="step-desc">ホーム画面のメニューから「レッスン一覧」を選びます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">カレンダーで日程を確認する</p>
+          <p class="step-desc">レッスンがある日付に小さなドット（●）が表示されます。← → で月を切り替えられます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">スタイリストで絞り込む（任意）</p>
+          <p class="step-desc">カレンダー上のプルダウンから担当スタイリストを選ぶと、そのスタイリストのレッスンだけが表示されます。「このスタイリストのスケジュールを見る」ボタンで詳細なスケジュールページも確認できます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <p class="step-title">レッスンカードをタップして詳細を見る</p>
+          <p class="step-desc">カード右側のバッジで状態を確認できます。</p>
+          <div class="mt-8">
+            <ul class="status-list">
+              <li>
+                <div class="status-dot" style="background: #4a9a6e"></div>
+                <div><span class="badge" style="border-color:#4a9a6e;color:#4a9a6e;font-size:9px">申込済み</span>　自分が申し込み済み</div>
+              </li>
+              <li>
+                <div class="status-dot" style="background: var(--danger)"></div>
+                <div><span class="badge badge-danger" style="font-size:9px">満員</span>　定員に達しているため申込不可</div>
+              </li>
+              <li>
+                <div class="status-dot" style="background: var(--border)"></div>
+                <div><span class="badge badge-accent" style="font-size:9px">締切済み</span>　申込期限が過ぎている</div>
+              </li>
+              <li>
+                <div class="status-dot" style="background: var(--accent)"></div>
+                <div><span class="badge badge-accent" style="font-size:9px">他店舗</span>　自分の店舗以外のレッスン</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="info-card">
+      <p class="info-card-title">定員バー</p>
+      <p>各カードの下部にある細いバーが埋まるほど定員に近い状態です。「定員 3/5 名」のように現在の参加人数 / 定員が表示されます。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 03 参加申し込み -->
+  <div class="chapter" id="p1-register">
+    <p class="chapter-num">03 — Register</p>
+    <h2 class="chapter-title">レッスンに<br>参加申し込みする</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">レッスン詳細を開く</p>
+          <p class="step-desc">レッスン一覧からカードをタップして詳細ページを開きます。種類・日付・スタイリスト・定員・申込締切を確認できます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">申し込みボタンをタップする</p>
+          <p class="step-desc">
+            <span class="btn-demo" style="font-size:10px;padding:4px 12px">このレッスンに参加申し込み</span>
+            <br><br>ボタンが表示されている場合のみ申し込みできます。
+          </p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">申込完了を確認する</p>
+          <p class="step-desc">「申し込みが完了しました」と表示され、カードに <span class="badge" style="border-color:#4a9a6e;color:#4a9a6e;font-size:9px">申込済み</span> バッジが付きます。アシスタント欄に自分の名前が追加されます。</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="warn-card">
+      <p>
+        <strong>申し込みできない場合</strong><br>
+        ・満員（定員に達している）<br>
+        ・申込締切日を過ぎている
+      </p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 04 キャンセル -->
+  <div class="chapter" id="p1-cancel">
+    <p class="chapter-num">04 — Cancel</p>
+    <h2 class="chapter-title">申し込みを<br>キャンセルする</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">申し込み済みのレッスン詳細を開く</p>
+          <p class="step-desc">レッスン一覧から <span class="badge" style="border-color:#4a9a6e;color:#4a9a6e;font-size:9px">申込済み</span> のカードをタップします。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">キャンセルボタンをタップする</p>
+          <p class="step-desc">
+            <span class="btn-demo btn-demo-danger" style="font-size:10px;padding:4px 12px">申込をキャンセルする</span>
+            <br><br>赤いボタンをタップします。
+          </p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">確認ダイアログで「OK」を選ぶ</p>
+          <p class="step-desc">「キャンセルしました」と表示されてキャンセルが完了します。</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note-card">
+      <p>申込締切日を過ぎていてもキャンセルは可能です。キャンセルした場合はスタイリストにも連絡するよう心がけてください。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 05 Googleカレンダー -->
+  <div class="chapter" id="p1-gcal">
+    <p class="chapter-num">05 — Google Calendar</p>
+    <h2 class="chapter-title">Google カレンダーに<br>追加する</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">レッスン詳細を開く</p>
+          <p class="step-desc">Google カレンダーに追加したいレッスンの詳細ページを開きます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">「Google カレンダーに追加」をタップする</p>
+          <p class="step-desc">
+            <span class="btn-demo btn-demo-ghost" style="font-size:10px;padding:4px 12px">Google カレンダーに追加</span>
+            <br><br>ブラウザが Google カレンダーの追加画面を開きます。
+          </p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">Google カレンダーで「保存」する</p>
+          <p class="step-desc">レッスン名・日付が自動で入力された状態で開きます。必要に応じて時間などを追記して保存してください。</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 06 合同レッスン調整 -->
+  <div class="chapter" id="p1-adjust">
+    <p class="chapter-num">06 — Group Scheduling</p>
+    <h2 class="chapter-title">合同レッスン調整に<br>参加する</h2>
+
+    <p class="text-sm text-accent" style="margin-bottom:20px">合同レッスン調整には「パターンA」と「パターンB」の2種類があります。</p>
+
+    <div class="pattern-row">
+      <div class="pattern-card active">
+        <div class="pattern-letter">A</div>
+        <div class="pattern-desc">みんなで調整<br>各自が空き日を入力</div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-letter">B</div>
+        <div class="pattern-desc">スタイリストが<br>候補日を提示して投票</div>
+      </div>
+    </div>
+
+    <p class="chapter-num" style="margin: 20px 0 12px">パターン A の場合</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「合同レッスン調整」をタップする</p>
+          <p class="step-desc">ホームメニューから「合同レッスン調整」を選びます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">対象の調整をタップする</p>
+          <p class="step-desc"><span class="badge badge-dark" style="font-size:9px">調整中</span> の調整を選びます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">空き日をカレンダーで選ぶ</p>
+          <p class="step-desc">「あなたの空き日を入力」カレンダーで参加できる日を複数タップして選択します（タップで選択・再タップで解除）。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <p class="step-title">「SAVE — 空き日を保存」をタップする</p>
+          <p class="step-desc">上部の集計カレンダーで全員の空き日を確認できます。色が濃いほど参加可能人数が多い日です。</p>
+        </div>
+      </li>
+    </ol>
+
+    <p class="chapter-num" style="margin: 24px 0 12px">パターン B の場合</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">候補日が表示されているか確認する</p>
+          <p class="step-desc">スタイリストが候補日を設定すると、カレンダーに候補日がハイライト表示されます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">参加できる日をタップして投票する</p>
+          <p class="step-desc">候補日をタップすると投票できます（再タップで取消）。「VOTE — 投票する」で送信します。</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="info-card">
+      <p class="info-card-title">調整の状態</p>
+      <p>
+        <span class="badge badge-dark" style="font-size:9px">調整中</span>　空き日 / 投票を受付中<br>
+        <span class="badge" style="border-color:#4a9a6e;color:#4a9a6e;font-size:9px">公開中</span>　レッスンとして公開済み<br>
+        <span class="badge badge-accent" style="font-size:9px">締切済み</span>　受付終了
+      </p>
+    </div>
+  </div>
+
+  <div style="height:48px"></div>
+</section>
+
+
+<!-- ════════════════════════════════════ PART 2: スタイリスト・管理者 -->
+<section id="part2" class="section">
+
+  <div class="part-intro">
+    <p class="part-label">Part 2 — Stylist / Admin</p>
+    <h1 class="part-title">レッスンの作成・<br>管理方法</h1>
+    <p class="part-desc">
+      スタイリストおよび管理者の方向けのガイドです。<br>
+      レッスンの公開から管理画面の操作まで説明します。
+    </p>
+  </div>
+
+  <!-- 目次 -->
+  <div class="toc">
+    <p class="toc-label">Contents</p>
+    <ul class="toc-list">
+      <li><a href="#p2-publish"><span class="toc-num">01</span>レッスンを公開する</a></li>
+      <li><a href="#p2-multidate"><span class="toc-num">02</span>複数日程を一括公開する</a></li>
+      <li><a href="#p2-edit"><span class="toc-num">03</span>レッスンを編集・複製・削除する</a></li>
+      <li><a href="#p2-mylessons"><span class="toc-num">04</span>担当レッスン一覧を確認する</a></li>
+      <li><a href="#p2-schedule"><span class="toc-num">05</span>スタイリストのスケジュールを見る</a></li>
+      <li><a href="#p2-adjustment"><span class="toc-num">06</span>合同レッスン調整を作成する</a></li>
+      <li><a href="#p2-admin"><span class="toc-num">07</span>管理画面の使い方</a></li>
+    </ul>
+  </div>
+
+
+  <!-- 01 レッスン公開 -->
+  <div class="chapter" id="p2-publish">
+    <p class="chapter-num">01 — Publish Lesson</p>
+    <h2 class="chapter-title">レッスンを公開する</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「レッスンを公開する」をタップする</p>
+          <p class="step-desc">ホームメニューの「レッスンを公開する」、または「担当レッスン一覧」から「＋ 新規レッスンを公開する」をタップします。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">レッスン種類を選ぶ</p>
+          <p class="step-desc">プルダウンから種類を選択します。種類は管理画面で追加できます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">日付をカレンダーで選ぶ</p>
+          <p class="step-desc">カレンダーをタップして日付を選択します。新規作成時は複数日の同時選択が可能です（→ 02 を参照）。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <p class="step-title">各項目を設定する</p>
+          <div class="mt-8">
+            <ul class="status-list">
+              <li><div class="status-dot" style="background:var(--black)"></div><div><strong>臨時スタイリスト</strong>（任意）: 代行スタイリストがいる場合に選択</div></li>
+              <li><div class="status-dot" style="background:var(--black)"></div><div><strong>定員</strong>: スライダーで 1〜10 名を設定</div></li>
+              <li><div class="status-dot" style="background:var(--black)"></div><div><strong>申込締切</strong>: 前日 / 3日前 / 1週間前 / 2週間前 / 1ヶ月前から選択</div></li>
+              <li><div class="status-dot" style="background:var(--black)"></div><div><strong>メモ</strong>（任意）: 持ち物・注意事項など</div></li>
+            </ul>
+          </div>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <p class="step-title">「PUBLISH — 公開する」をタップする</p>
+          <p class="step-desc">公開するとアシスタントがレッスン一覧から参照・申し込みできるようになります。</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 02 複数日程 -->
+  <div class="chapter" id="p2-multidate">
+    <p class="chapter-num">02 — Multi-Date Publish</p>
+    <h2 class="chapter-title">複数日程を<br>一括公開する</h2>
+
+    <p class="text-sm text-accent" style="margin-bottom:16px">同じ内容のレッスンを複数の日程でまとめて作成できます。</p>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">新規レッスン公開フォームを開く</p>
+          <p class="step-desc">「レッスンを公開する」から新規作成フォームを開きます。（既存レッスンの編集時は単一日付のみ）</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">カレンダーで複数の日付をタップする</p>
+          <p class="step-desc">タップした日付が選択状態（ハイライト）になります。再タップすると選択が解除されます。選択した日付が「日付（複数選択可）」欄にすべて表示されます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">その他の項目を設定して公開する</p>
+          <p class="step-desc">選択した日付分のレッスンがまとめて作成されます。「3件のレッスンを公開しました」のように作成件数が通知されます。</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note-card">
+      <p>月をまたいだ複数日程を設定したい場合は、← → で月を切り替えながら日付を追加してください。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 03 編集・複製・削除 -->
+  <div class="chapter" id="p2-edit">
+    <p class="chapter-num">03 — Edit / Duplicate / Delete</p>
+    <h2 class="chapter-title">レッスンを<br>編集・複製・削除する</h2>
+
+    <p class="text-sm text-accent" style="margin-bottom:16px">自分が担当するレッスン、または管理者権限のあるアカウントから操作できます。</p>
+
+    <p class="chapter-num" style="margin-bottom:12px">編集する</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">レッスン詳細を開いて「編集」をタップ</p>
+          <p class="step-desc">
+            <span class="btn-demo btn-demo-ghost" style="font-size:10px;padding:4px 12px">編集</span>
+            <br><br>種類・日付・定員・締切・メモを変更できます。変更後「UPDATE — 更新する」で保存します。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <p class="chapter-num" style="margin: 24px 0 12px">複製する</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「複製する」をタップする</p>
+          <p class="step-desc">
+            <span class="btn-demo btn-demo-ghost" style="font-size:10px;padding:4px 12px">複製する</span>
+            <br><br>種類・定員・締切・メモを引き継いだ新規作成フォームが開きます。
+          </p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">新しい日程を選択して公開する</p>
+          <p class="step-desc">複製時は日付が空の状態で始まります。カレンダーで新しい日程を選んで公開してください。複数日も選択可能です。</p>
+        </div>
+      </li>
+    </ol>
+
+    <p class="chapter-num" style="margin: 24px 0 12px">削除する</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「削除」をタップして確認する</p>
+          <p class="step-desc">
+            <span class="btn-demo btn-demo-danger" style="font-size:10px;padding:4px 12px">削除</span>
+            <br><br>確認ダイアログで「OK」を選ぶと削除されます。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="warn-card">
+      <p>削除は取り消せません。申し込み済みのアシスタントがいる場合は事前に連絡してから削除してください。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 04 担当レッスン一覧 -->
+  <div class="chapter" id="p2-mylessons">
+    <p class="chapter-num">04 — My Lessons</p>
+    <h2 class="chapter-title">担当レッスン一覧を<br>確認する</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「担当レッスン一覧」をタップする</p>
+          <p class="step-desc">ホームメニューの「担当レッスン一覧」を選びます。スタイリストのみ表示されるメニューです。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">カレンダーと一覧で確認する</p>
+          <p class="step-desc">自分が担当するレッスンがカレンダーにドットで表示されます。今月のレッスン一覧から各レッスンの詳細・参加状況を確認できます。</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="info-card">
+      <p class="info-card-title">アシスタントを手動追加する</p>
+      <p>レッスン詳細の「アシスタントを追加する」ボタンから、締切後でも手動でアシスタントを追加できます（スタイリスト・管理者のみ）。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 05 スタイリストスケジュール -->
+  <div class="chapter" id="p2-schedule">
+    <p class="chapter-num">05 — Stylist Schedule</p>
+    <h2 class="chapter-title">スタイリストの<br>スケジュールを見る</h2>
+
+    <p class="text-sm text-accent" style="margin-bottom:16px">特定のスタイリストが担当するレッスンを一覧で確認できます。</p>
+
+    <p class="chapter-num" style="margin-bottom:12px">レッスン一覧から</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">スタイリストをフィルターで選ぶ</p>
+          <p class="step-desc">「レッスン一覧」のプルダウンでスタイリスト名を選択します。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">「このスタイリストのスケジュールを見る」をタップ</p>
+          <p class="step-desc">プルダウンの下に表示されるボタンをタップすると、そのスタイリストの専用スケジュールページが開きます。カレンダーと一覧で全レッスンを確認できます。</p>
+        </div>
+      </li>
+    </ol>
+
+    <p class="chapter-num" style="margin: 20px 0 12px">レッスン詳細から</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">レッスン詳細の「スケジュール」ボタンをタップ</p>
+          <p class="step-desc">スタイリスト名の横にある <span class="btn-demo btn-demo-ghost" style="font-size:9px;padding:2px 8px">スケジュール</span> ボタンをタップします。</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 06 合同レッスン調整作成 -->
+  <div class="chapter" id="p2-adjustment">
+    <p class="chapter-num">06 — Group Scheduling</p>
+    <h2 class="chapter-title">合同レッスン調整を<br>作成する</h2>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">「合同レッスン調整」→「＋ 新規調整を作成」</p>
+          <p class="step-desc">ホームメニューから「合同レッスン調整」を開き、「＋ 新規調整を作成する」をタップします。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">タイトルを入力する</p>
+          <p class="step-desc">例：「6月合同レッスン調整」のようにわかりやすいタイトルをつけます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">パターンを選ぶ</p>
+          <div class="pattern-row mt-8">
+            <div class="pattern-card active">
+              <div class="pattern-letter">A</div>
+              <div class="pattern-desc">各自が空き日を入力して集計</div>
+            </div>
+            <div class="pattern-card">
+              <div class="pattern-letter">B</div>
+              <div class="pattern-desc">スタイリストが候補日を提示して全員が投票</div>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <p class="step-title">担当スタイリストと参加メンバーを選ぶ</p>
+          <p class="step-desc">担当スタイリストをプルダウンで、参加メンバーをチェックリストで選択します（複数選択可）。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <p class="step-title">「CREATE — 調整を作成」をタップ</p>
+          <p class="step-desc">パターン B の場合、作成後に候補日カレンダーが表示されます。候補日を選んで「CONFIRM — 候補日を確定」してください。</p>
+        </div>
+      </li>
+    </ol>
+
+    <p class="chapter-num" style="margin: 24px 0 12px">調整完了後にレッスンを公開する</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">調整詳細の「PUBLISH — このレッスンを公開する」をタップ</p>
+          <p class="step-desc">参加回答をもとに「おすすめ日程」が自動表示されます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">確定日・種類・定員・締切を設定して公開</p>
+          <p class="step-desc">公開するとレッスン一覧に表示され、アシスタントが申し込めるようになります。</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">締め切る場合は「CLOSE — 申し込みを締め切る」</p>
+          <p class="step-desc">公開後に申し込みを締め切ると、ステータスが「締切済み」に変わります。</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 07 管理画面 -->
+  <div class="chapter" id="p2-admin">
+    <p class="chapter-num">07 — Admin Panel</p>
+    <h2 class="chapter-title">管理画面の使い方</h2>
+
+    <p class="text-sm text-accent" style="margin-bottom:16px">管理画面は管理権限のあるアカウントのみアクセスできます。ホームメニューの「管理画面」→ パスワードを入力してログインします。</p>
+
+    <div class="admin-tabs-demo">
+      <div class="admin-tab-demo active">レッスン</div>
+      <div class="admin-tab-demo">集計</div>
+      <div class="admin-tab-demo">スタッフ</div>
+      <div class="admin-tab-demo">種類</div>
+      <div class="admin-tab-demo">店舗</div>
+    </div>
+
+    <ul class="steps" style="margin-top:20px">
+
+      <li class="step">
+        <div class="step-num" style="font-family:'Playfair Display',serif;font-size:13px;width:28px;height:28px">L</div>
+        <div class="step-body">
+          <p class="step-title">レッスンタブ</p>
+          <p class="step-desc">全レッスンを日付の新しい順に一覧表示します。各レッスンの参加アシスタント名と埋まり具合を一目で確認できます。</p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-num" style="font-family:'Playfair Display',serif;font-size:13px;width:28px;height:28px">S</div>
+        <div class="step-body">
+          <p class="step-title">集計タブ</p>
+          <p class="step-desc">公開レッスン数・総参加人数の集計と、スタイリスト別レッスン回数・アシスタント別参加回数をテーブルで確認できます。他店舗からの参加件数も集計されます。</p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-num" style="font-family:'Playfair Display',serif;font-size:13px;width:28px;height:28px">F</div>
+        <div class="step-body">
+          <p class="step-title">スタッフタブ</p>
+          <p class="step-desc">スタッフ（スタイリスト・アシスタント）の追加・編集・削除ができます。</p>
+          <div class="info-card" style="margin-top:10px">
+            <p class="info-card-title">ふりがなで五十音順に並び替える</p>
+            <p>スタッフ追加・編集時に「ふりがな」欄を入力すると、ログイン画面や各一覧がふりがなの五十音順で自動的に並び替わります。ひらがなで入力してください（例: やまだ はなこ）。</p>
+          </div>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-num" style="font-family:'Playfair Display',serif;font-size:13px;width:28px;height:28px">T</div>
+        <div class="step-body">
+          <p class="step-title">種類タブ</p>
+          <p class="step-desc">レッスン種類（カット練習・カラー練習など）の追加・編集・削除ができます。各種類には名前・形式（個別/グループ/オンライン）・所要時間・レベルを設定できます。</p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-num" style="font-family:'Playfair Display',serif;font-size:13px;width:28px;height:28px">P</div>
+        <div class="step-body">
+          <p class="step-title">店舗タブ（全体管理者のみ）</p>
+          <p class="step-desc">店舗の追加・編集・削除ができます。店舗名・エリア・住所を設定できます。全体管理者権限のアカウントのみ表示されます。</p>
+        </div>
+      </li>
+    </ul>
+
+    <div class="info-card" style="margin-top:8px">
+      <p class="info-card-title">管理者の種類</p>
+      <p>
+        <strong>全体管理者</strong>: 全店舗のデータを管理できる最高権限<br>
+        <strong>店舗管理者</strong>: 担当店舗のデータを管理できる権限
+      </p>
+    </div>
+  </div>
+
+  <div style="height:48px"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ FOOTER -->
+<footer class="site-footer">
+  <p>tasty lesson</p>
+  <p style="margin-top:4px">Salon Schedule Manager</p>
+</footer>
+
+<script>
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0 });
+  }
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        const offset = document.querySelector('.tab-nav').offsetHeight + 12;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+</body>
+</html>
