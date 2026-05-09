@@ -11,7 +11,7 @@ const DEADLINE_OPTS = [
   { value: '2weeks', label: '2週間前' },
   { value: '1month', label: '1ヶ月前' },
 ];
-const ROLE_LABELS  = { instructor: '講師', participant: '参加者', temp_instructor: '臨時講師' };
+const ROLE_LABELS  = { instructor: 'スタイリスト', participant: 'アシスタント', temp_instructor: '臨時スタイリスト' };
 const ADMIN_LABELS = { super_admin: '全体管理者', store_admin: '店舗管理者' };
 const LEVEL_OPTS   = ['初級', '中級', '上級', '全レベル'];
 const FORMAT_OPTS  = ['個別', 'グループ', 'オンライン'];
@@ -225,12 +225,24 @@ function renderCalendar(year, month, opts = {}) {
 window.calDayClick = function(dateStr) {
   const view = S.view;
   if (view === 'publishLesson') {
-    S.selectingDates = [dateStr];
-    const el = document.getElementById('lesson-date-display');
-    if (el) el.textContent = fmtDate(dateStr);
-    const inp = document.getElementById('lesson-date-input');
-    if (inp) inp.value = dateStr;
-    repaintCalBlock('lesson-cal', 'select-single', [dateStr]);
+    const isEditing = !!S.viewParams.id;
+    if (isEditing) {
+      S.selectingDates = [dateStr];
+      const el = document.getElementById('lesson-date-display');
+      if (el) el.textContent = fmtDate(dateStr);
+      const inp = document.getElementById('lesson-date-input');
+      if (inp) inp.value = dateStr;
+      repaintCalBlock('lesson-cal', 'select-single', S.selectingDates);
+    } else {
+      toggleDate(dateStr);
+      const el = document.getElementById('lesson-date-display');
+      if (el) el.textContent = S.selectingDates.length
+        ? S.selectingDates.sort().map(fmtDate).join('、')
+        : '日付を選んでください（複数選択可）';
+      const inp = document.getElementById('lesson-date-input');
+      if (inp) inp.value = S.selectingDates[0] || '';
+      repaintCalBlock('lesson-cal', 'select-multi', S.selectingDates);
+    }
   } else if (view === 'adjustmentDetail') {
     toggleDate(dateStr);
     const adj = S.adjustments.find(a => a.id === S.viewParams.id);
@@ -279,9 +291,9 @@ function repaintCalBlock(id, mode, selected, adj) {
 function repaintCurrentCal() {
   const view = S.view;
   if (view === 'publishLesson') {
-    const sel = S.selectingDates;
-    repaintCalBlock('lesson-cal', 'select-single', sel);
-  } else if (view === 'lessonList' || view === 'myLessons') {
+    const isEditing = !!S.viewParams.id;
+    repaintCalBlock('lesson-cal', isEditing ? 'select-single' : 'select-multi', S.selectingDates);
+  } else if (view === 'lessonList' || view === 'myLessons' || view === 'stylistSchedule') {
     paint();
   } else if (view === 'adjustmentDetail') {
     const adj = S.adjustments.find(a => a.id === S.viewParams.id);
@@ -341,12 +353,16 @@ function paint() {
       content = viewLessonDetail(p);
       break;
     case 'publishLesson':
-      header  = headerPage(p.id ? 'レッスン編集' : 'レッスン公開');
+      header  = headerPage(p.id ? 'レッスン編集' : p.duplicateId ? 'レッスン複製' : 'レッスン公開');
       content = viewPublishLesson(p);
       break;
     case 'myLessons':
       header  = headerPage('担当レッスン');
       content = viewMyLessons();
+      break;
+    case 'stylistSchedule':
+      header  = headerPage('スタイリストのスケジュール');
+      content = viewStylistSchedule(p);
       break;
     case 'adjustmentList':
       header  = headerPage('合同レッスン調整');
@@ -452,9 +468,9 @@ window.selectStore = function(storeId) {
 // ── VIEW: LOGIN ────────────────────────────────────────────
 function viewLogin() {
   const groups = [
-    { label: '講師', role: 'instructor' },
-    { label: '臨時講師', role: 'temp_instructor' },
-    { label: '参加者', role: 'participant' },
+    { label: 'スタイリスト', role: 'instructor' },
+    { label: '臨時スタイリスト', role: 'temp_instructor' },
+    { label: 'アシスタント', role: 'participant' },
   ];
   let html = '<div class="page">';
   html += '<p style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);padding:20px 0 16px;text-align:center">名前を選んでください</p>';
@@ -558,9 +574,10 @@ function viewLessonList(p) {
   // Instructor filter
   html += `<div style="padding:12px 0 0">
     <select class="form-select" onchange="filterByInstructor(this.value)" style="font-size:12px">
-      <option value="">すべての講師</option>
+      <option value="">すべてのスタイリスト</option>
       ${instructors.map(i => `<option value="${i.id}" ${filterInst===i.id?'selected':''}>${esc(i.name)}</option>`).join('')}
     </select>
+    ${filterInst ? `<button class="btn btn-sm btn-ghost" style="margin-top:8px;width:100%" onclick="go('stylistSchedule',{userId:'${filterInst}'})">このスタイリストのスケジュールを見る</button>` : ''}
   </div>`;
 
   // Calendar
@@ -671,8 +688,11 @@ function viewLessonDetail(p) {
           <td class="text-xs text-accent" style="padding:8px 0">日付</td>
           <td style="font-size:13px">${fmtDate(l.date)}</td></tr>
       <tr style="border-top:1px solid var(--border)">
-          <td class="text-xs text-accent" style="padding:8px 0">講師</td>
-          <td style="font-size:13px">${esc(inst ? inst.name : '—')}</td></tr>
+          <td class="text-xs text-accent" style="padding:8px 0">スタイリスト</td>
+          <td style="font-size:13px">
+            ${esc(inst ? inst.name : '—')}
+            ${inst ? `<button class="btn btn-sm btn-ghost" style="margin-left:8px;font-size:10px;padding:2px 8px" onclick="go('stylistSchedule',{userId:'${l.instructorId}'})">スケジュール</button>` : ''}
+          </td></tr>
       ${tempI ? `<tr style="border-top:1px solid var(--border)">
           <td class="text-xs text-accent" style="padding:8px 0">代行</td>
           <td style="font-size:13px">${esc(tempI.name)}</td></tr>` : ''}
@@ -690,16 +710,16 @@ function viewLessonDetail(p) {
 
   // Participants
   html += `<div class="card" style="margin-top:0">
-    <p class="section-label" style="margin-bottom:10px">参加者 ${l.participants.length}名</p>
+    <p class="section-label" style="margin-bottom:10px">アシスタント ${l.participants.length}名</p>
     ${l.participants.length ? `<div class="participants-row">${l.participants.map(id =>
       `<span class="participant-chip">${esc(uName(id))}</span>`).join('')}</div>`
-      : '<p class="text-sm text-accent">まだ参加者がいません</p>'}
+      : '<p class="text-sm text-accent">まだアシスタントがいません</p>'}
   </div>`;
 
   // Actions
   html += '<div style="padding:16px 0;display:flex;flex-direction:column;gap:8px">';
   if (reg) {
-    html += `<button class="btn" onclick="cancelLesson('${l.id}')">申込をキャンセルする</button>`;
+    html += `<button class="btn btn-danger" onclick="cancelLesson('${l.id}')">申込をキャンセルする</button>`;
   } else if (!full && !passed) {
     html += `<button class="btn btn-primary" onclick="registerLesson('${l.id}')">このレッスンに参加申し込み</button>`;
   } else if (full) {
@@ -710,7 +730,7 @@ function viewLessonDetail(p) {
 
   // Instructor can add any member
   if (isOwner || isAdmin()) {
-    html += `<button class="btn btn-ghost" onclick="showAddParticipant('${l.id}')">参加者を追加する</button>`;
+    html += `<button class="btn btn-ghost" onclick="showAddParticipant('${l.id}')">アシスタントを追加する</button>`;
   }
 
   // Google Calendar
@@ -719,6 +739,7 @@ function viewLessonDetail(p) {
   if (isOwner || isAdmin()) {
     html += `<hr class="divider">
       <button class="btn btn-ghost" onclick="go('publishLesson',{id:'${l.id}'})">編集</button>
+      <button class="btn btn-ghost" onclick="go('publishLesson',{duplicateId:'${l.id}'})">複製する</button>
       <button class="btn btn-danger" onclick="deleteLesson('${l.id}')">削除</button>`;
   }
   html += '</div></div>';
@@ -760,7 +781,7 @@ window.showAddParticipant = function(lessonId) {
   const eligible = S.users.filter(u => !lesson.participants.includes(u.id));
   const html = `<div class="modal-overlay" onclick="if(event.target===this)this.remove()">
     <div class="modal">
-      <p class="modal-title">参加者を追加</p>
+      <p class="modal-title">アシスタントを追加</p>
       <ul class="check-list">
         ${eligible.map(u => `<li class="check-item" onclick="addParticipant('${lessonId}','${u.id}',this)">
           <span class="check-box" id="chk-${u.id}"></span>
@@ -805,13 +826,24 @@ window.addToGoogleCal = function(lessonId) {
 
 // ── VIEW: PUBLISH LESSON ──────────────────────────────────
 function viewPublishLesson(p) {
-  const editing = p.id ? S.lessons.find(l => l.id === p.id) : null;
+  const editing    = p.id        ? S.lessons.find(l => l.id === p.id)        : null;
+  const duplicating = p.duplicateId ? S.lessons.find(l => l.id === p.duplicateId) : null;
+  const template   = editing || duplicating;
   const tempInstructors = S.users.filter(u => u.role === 'temp_instructor');
-  S.calYear = S.calYear; S.calMonth = S.calMonth;
-  if (!S.selectingDates.length && editing) S.selectingDates = [editing.date];
-  else if (!editing) S.selectingDates = [];
 
-  const sel = editing ? [editing.date] : S.selectingDates;
+  if (editing) {
+    if (!S.selectingDates.length) S.selectingDates = [editing.date];
+  } else {
+    S.selectingDates = [];
+  }
+
+  const isEditing  = !!editing;
+  const calMode    = isEditing ? 'select-single' : 'select-multi';
+  const sel        = S.selectingDates;
+
+  const dateDisplayText = isEditing
+    ? (sel[0] ? fmtDate(sel[0]) : '日付を選んでください')
+    : (sel.length ? sel.slice().sort().map(fmtDate).join('、') : '日付を選んでください（複数選択可）');
 
   let html = '<div class="page" style="padding-top:16px">';
 
@@ -820,31 +852,31 @@ function viewPublishLesson(p) {
     <label class="form-label">レッスン種類</label>
     <select class="form-select" id="f-type">
       <option value="">選択してください</option>
-      ${S.lessonTypes.map(t => `<option value="${t.id}" ${editing && editing.typeId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}
+      ${S.lessonTypes.map(t => `<option value="${t.id}" ${template && template.typeId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}
     </select>
   </div>`;
 
   // Date
   html += `<div class="form-group">
-    <label class="form-label">日付</label>
-    <p id="lesson-date-display" style="font-size:13px;padding:8px 0;color:${sel[0]?'var(--black)':'var(--accent)'}">
-      ${sel[0] ? fmtDate(sel[0]) : '日付を選んでください'}
+    <label class="form-label">日付${isEditing ? '' : '（複数選択可）'}</label>
+    <p id="lesson-date-display" style="font-size:13px;padding:8px 0;color:${sel.length?'var(--black)':'var(--accent)'}">
+      ${esc(dateDisplayText)}
     </p>
     <input type="hidden" id="lesson-date-input" value="${esc(sel[0]||'')}">
-    <div id="lesson-cal">${renderCalendar(S.calYear, S.calMonth, { mode:'select-single', selected: sel })}</div>
+    <div id="lesson-cal">${renderCalendar(S.calYear, S.calMonth, { mode: calMode, selected: sel })}</div>
   </div>`;
 
   // Temp instructor
   html += `<div class="form-group">
-    <label class="form-label">臨時講師（任意）</label>
+    <label class="form-label">臨時スタイリスト（任意）</label>
     <select class="form-select" id="f-temp">
       <option value="">なし</option>
-      ${tempInstructors.map(t => `<option value="${t.id}" ${editing && editing.tempInstructorId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}
+      ${tempInstructors.map(t => `<option value="${t.id}" ${template && template.tempInstructorId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}
     </select>
   </div>`;
 
   // Capacity
-  const capVal = editing ? editing.capacity : 5;
+  const capVal = template ? template.capacity : 5;
   html += `<div class="form-group">
     <label class="form-label">定員（最大10名）</label>
     <div class="capacity-display">
@@ -858,19 +890,19 @@ function viewPublishLesson(p) {
   html += `<div class="form-group">
     <label class="form-label">申込締切</label>
     <select class="form-select" id="f-deadline">
-      ${DEADLINE_OPTS.map(o => `<option value="${o.value}" ${editing && editing.deadline===o.value?'selected':''}>${o.label}</option>`).join('')}
+      ${DEADLINE_OPTS.map(o => `<option value="${o.value}" ${template && template.deadline===o.value?'selected':''}>${o.label}</option>`).join('')}
     </select>
   </div>`;
 
   // Memo
   html += `<div class="form-group">
     <label class="form-label">メモ</label>
-    <textarea class="form-textarea" id="f-memo" placeholder="任意のメモを入力">${esc(editing ? editing.memo : '')}</textarea>
+    <textarea class="form-textarea" id="f-memo" placeholder="任意のメモを入力">${esc(template ? template.memo : '')}</textarea>
   </div>`;
 
   html += `<div style="padding-bottom:32px">
     <button class="btn btn-primary" onclick="submitLesson('${editing ? editing.id : ''}')">
-      ${editing ? 'UPDATE' : 'PUBLISH'} — ${editing ? '更新する' : '公開する'}
+      ${isEditing ? 'UPDATE — 更新する' : 'PUBLISH — 公開する'}
     </button>
   </div></div>`;
   return html;
@@ -878,32 +910,32 @@ function viewPublishLesson(p) {
 
 window.submitLesson = async function(editId) {
   const typeId   = document.getElementById('f-type').value;
-  const date     = document.getElementById('f-date-input') ? document.getElementById('f-date-input').value
-                 : document.getElementById('lesson-date-input').value;
   const tempId   = document.getElementById('f-temp').value;
   const capacity = parseInt(document.getElementById('f-cap').value);
   const deadline = document.getElementById('f-deadline').value;
   const memo     = document.getElementById('f-memo').value;
 
-  if (!typeId)  { toast('レッスン種類を選んでください', 'error'); return; }
-  if (!date)    { toast('日付を選んでください', 'error'); return; }
-
-  const body = {
-    typeId, date, capacity, deadline, memo,
-    instructorId: S.user.id,
-    storeId: S.user.storeId,
-    tempInstructorId: tempId || null,
-  };
+  if (!typeId) { toast('レッスン種類を選んでください', 'error'); return; }
 
   try {
     if (editId) {
+      const date = document.getElementById('lesson-date-input').value;
+      if (!date) { toast('日付を選んでください', 'error'); return; }
+      const body = { typeId, date, capacity, deadline, memo,
+        instructorId: S.user.id, storeId: S.user.storeId, tempInstructorId: tempId || null };
       const updated = await api.put(`/lessons/${editId}`, body);
       S.lessons = S.lessons.map(l => l.id === editId ? { ...l, ...updated } : l);
       toast('更新しました', 'success');
     } else {
-      const created = await api.post('/lessons', body);
-      S.lessons.push(created);
-      toast('公開しました', 'success');
+      const dates = S.selectingDates;
+      if (!dates.length) { toast('日付を選んでください', 'error'); return; }
+      for (const date of dates) {
+        const body = { typeId, date, capacity, deadline, memo,
+          instructorId: S.user.id, storeId: S.user.storeId, tempInstructorId: tempId || null };
+        const created = await api.post('/lessons', body);
+        S.lessons.push(created);
+      }
+      toast(dates.length > 1 ? `${dates.length}件のレッスンを公開しました` : '公開しました', 'success');
     }
     S.selectingDates = [];
     go('myLessons');
@@ -940,6 +972,43 @@ function viewMyLessons() {
     });
   }
   html += '</div></div>';
+  return html;
+}
+
+// ── VIEW: STYLIST SCHEDULE ────────────────────────────────
+function viewStylistSchedule(p) {
+  const stylist = S.users.find(u => u.id === p.userId);
+  if (!stylist) return '<div class="page"><p>スタイリストが見つかりません</p></div>';
+
+  const st = S.stores.find(s => s.id === stylist.storeId);
+  const allLessons = S.lessons
+    .filter(l => l.instructorId === p.userId)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const y = S.calYear, m = S.calMonth;
+  const monthLessons = allLessons.filter(l => {
+    const d = new Date(l.date + 'T00:00:00');
+    return d.getFullYear() === y && d.getMonth()+1 === m;
+  });
+  const lessonDates = [...new Set(allLessons.map(l => l.date))];
+
+  let html = '<div class="page">';
+  html += `<div class="card" style="margin-top:16px">
+    <div style="font-size:14px;font-weight:300">${esc(stylist.name)}</div>
+    <div class="text-xs text-accent" style="margin-top:4px">スタイリスト${st ? '　' + esc(st.name) : ''}</div>
+  </div>`;
+
+  html += `<div id="lesson-cal-view">${renderCalendar(y, m, { mode:'view', lessonDates })}</div>`;
+
+  if (monthLessons.length === 0) {
+    html += `<div class="empty-state"><div class="empty-state-icon">📅</div>
+      <p class="empty-state-text">今月のレッスンがありません</p></div>`;
+  } else {
+    html += '<div style="margin-top:12px">';
+    monthLessons.forEach(l => { html += lessonCard(l, false); });
+    html += '</div>';
+  }
+  html += '</div>';
   return html;
 }
 
@@ -1083,7 +1152,7 @@ function adjDetailPatternB(adj, isOwner) {
   let html = '';
 
   if (isOwner && (!adj.candidates || !adj.candidates.length)) {
-    html += `<p class="section-label" style="margin-top:4px">候補日を設定（講師）</p>
+    html += `<p class="section-label" style="margin-top:4px">候補日を設定（スタイリスト）</p>
     <p class="text-sm text-accent" style="padding:8px 0">複数日を選んでください</p>
     <div id="adj-create-cal">${renderCalendar(y, m, { mode:'select-multi', selected: S.selectingDates })}</div>
     <div style="margin-top:16px">
@@ -1321,14 +1390,14 @@ function viewCreateAdjustment() {
       </div>
       <div class="pattern-card" data-pattern="B" onclick="selectPattern('B')">
         <div class="pattern-card-letter">B</div>
-        <div class="pattern-card-desc">講師が候補を提示<br>参加者が投票</div>
+        <div class="pattern-card-desc">スタイリストが候補を提示<br>アシスタントが投票</div>
       </div>
     </div>
     <input type="hidden" id="adj-pattern" value="A">
   </div>`;
 
   html += `<div class="form-group">
-    <label class="form-label">担当講師</label>
+    <label class="form-label">担当スタイリスト</label>
     <select class="form-select" id="adj-instructor">
       ${instructors.map(i => `<option value="${i.id}" ${S.user && S.user.id===i.id?'selected':''}>${esc(i.name)}</option>`).join('')}
     </select>
@@ -1494,7 +1563,7 @@ function adminTabLessons() {
         </div>
         <span class="tag">${l.participants.length}/${l.capacity}名</span>
       </div>
-      ${parts.length ? `<div class="participants-row">${parts.join('')}</div>` : '<p class="text-xs text-accent">参加者なし</p>'}
+      ${parts.length ? `<div class="participants-row">${parts.join('')}</div>` : '<p class="text-xs text-accent">アシスタントなし</p>'}
     </div>`;
   }).join('');
 }
@@ -1537,15 +1606,15 @@ function adminTabStats() {
     html += `<p class="text-xs text-accent" style="margin-bottom:16px">うち他店舗からの参加: ${crossStoreCount}件</p>`;
   }
 
-  html += `<p class="section-label" style="margin-bottom:12px">講師別レッスン</p>
+  html += `<p class="section-label" style="margin-bottom:12px">スタイリスト別レッスン</p>
   <table class="data-table">
-    <tr><th>講師</th><th>回数</th><th>参加人数</th></tr>
+    <tr><th>スタイリスト</th><th>回数</th><th>参加人数</th></tr>
     ${Object.entries(instMap).sort((a,b) => b[1].lessons-a[1].lessons).map(([id,v]) =>
       `<tr><td>${esc(uName(id))}</td><td>${v.lessons}</td><td>${v.participants}</td></tr>`
     ).join('')}
   </table>`;
 
-  html += `<p class="section-label" style="margin:20px 0 12px">参加者別レッスン数</p>
+  html += `<p class="section-label" style="margin:20px 0 12px">アシスタント別レッスン数</p>
   <table class="data-table">
     <tr><th>名前</th><th>参加回数</th></tr>
     ${Object.entries(partMap).sort((a,b) => b[1]-a[1]).map(([id,cnt]) => {
