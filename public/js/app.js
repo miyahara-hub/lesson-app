@@ -116,6 +116,13 @@ function isFull(lesson) { return lesson.participants.length >= lesson.capacity; 
 function isRegistered(lesson) { return S.user && lesson.participants.includes(S.user.id); }
 function dlLabel(key) { const o = DEADLINE_OPTS.find(x => x.value === key); return o ? o.label : key; }
 
+// ── SORTING ───────────────────────────────────────────────
+function sortByFurigana(users) {
+  return [...users].sort((a, b) =>
+    (a.furigana || a.name).localeCompare(b.furigana || b.name, 'ja')
+  );
+}
+
 // Store-filtered helpers (respects S.selectedStore)
 function storeFilteredLessons() {
   if (!S.selectedStore || S.selectedStore === 'all') return S.lessons;
@@ -476,10 +483,10 @@ function viewLogin() {
   html += '<p style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);padding:20px 0 16px;text-align:center">名前を選んでください</p>';
 
   groups.forEach(g => {
-    const members = S.users.filter(u =>
+    const members = sortByFurigana(S.users.filter(u =>
       u.role === g.role &&
       (S.selectedStore === 'all' || !S.selectedStore || u.storeId === S.selectedStore)
-    );
+    ));
     if (!members.length) return;
     html += `<p class="section-label">${g.label}</p>`;
     html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 0">';
@@ -559,10 +566,10 @@ function viewLessonList(p) {
   const lessonDates = [...new Set(monthLessons.map(l => l.date))];
 
   // Instructor filter — only show instructors from the current store scope
-  const instructors = S.users.filter(u =>
+  const instructors = sortByFurigana(S.users.filter(u =>
     isInstructor(u) &&
     (S.selectedStore === 'all' || !S.selectedStore || u.storeId === S.selectedStore)
-  );
+  ));
   const filterInst = p.instructorId || '';
 
   let displayLessons = monthLessons;
@@ -778,7 +785,7 @@ window.deleteLesson = async function(lessonId) {
 window.showAddParticipant = function(lessonId) {
   const lesson = S.lessons.find(l => l.id === lessonId);
   if (!lesson) return;
-  const eligible = S.users.filter(u => !lesson.participants.includes(u.id));
+  const eligible = sortByFurigana(S.users.filter(u => !lesson.participants.includes(u.id)));
   const html = `<div class="modal-overlay" onclick="if(event.target===this)this.remove()">
     <div class="modal">
       <p class="modal-title">アシスタントを追加</p>
@@ -1407,7 +1414,7 @@ function viewCreateAdjustment() {
   html += `<div class="form-group">
     <label class="form-label">参加メンバー</label>
     <ul class="check-list" id="member-list">
-      ${S.users.map(u => `<li class="check-item" onclick="toggleMember(this,'${u.id}')">
+      ${sortByFurigana(S.users).map(u => `<li class="check-item" onclick="toggleMember(this,'${u.id}')">
         <span class="check-box ${S.user && u.id===S.user.id?'checked':''}" id="m-${u.id}"></span>
         <span>
           <span class="check-label">${esc(u.name)}</span>
@@ -1641,14 +1648,14 @@ function adminTabStaff() {
   ['instructor','temp_instructor','participant'].forEach(role => {
     if (!grouped[role]) return;
     html += `<p class="section-label" style="margin-bottom:0">${ROLE_LABELS[role]}</p>`;
-    grouped[role].forEach(user => {
+    sortByFurigana(grouped[role]).forEach(user => {
       const st = stores.find(s => s.id === user.storeId);
       html += `<div class="card" style="margin-top:0;border-top:none">
         <div class="flex-between">
           <div>
             <div style="font-size:13px;font-weight:300">${esc(user.name)}</div>
             <div class="text-xs text-accent" style="margin-top:2px">
-              ${st ? esc(st.name) : '—'}
+              ${user.furigana ? esc(user.furigana) + '　' : ''}${st ? esc(st.name) : '—'}
               ${user.adminRole ? `　<span class="tag tag-dark">${ADMIN_LABELS[user.adminRole]||user.adminRole}</span>` : ''}
             </div>
           </div>
@@ -1671,6 +1678,10 @@ window.showStaffModal = function(userId) {
       <div class="form-group">
         <label class="form-label">名前</label>
         <input class="form-input" id="sf-name" value="${esc(user ? user.name : '')}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ふりがな</label>
+        <input class="form-input" id="sf-furigana" value="${esc(user ? user.furigana || '' : '')}" placeholder="例: やまだ はなこ">
       </div>
       <div class="form-group">
         <label class="form-label">役割</label>
@@ -1702,15 +1713,16 @@ window.showStaffModal = function(userId) {
 };
 
 window.saveStaff = async function(userId, modal) {
-  const name  = document.getElementById('sf-name').value.trim();
-  const role  = document.getElementById('sf-role').value;
-  const storeId = document.getElementById('sf-store').value;
+  const name     = document.getElementById('sf-name').value.trim();
+  const furigana = document.getElementById('sf-furigana').value.trim();
+  const role     = document.getElementById('sf-role').value;
+  const storeId  = document.getElementById('sf-store').value;
   const adminRole = document.getElementById('sf-admin').value || null;
 
   if (!name) { toast('名前を入力してください', 'error'); return; }
 
   try {
-    const body = { name, role, storeId, adminRole };
+    const body = { name, furigana: furigana || null, role, storeId, adminRole };
     if (userId) {
       const updated = await api.put(`/users/${userId}`, body);
       S.users = S.users.map(u => u.id === userId ? updated : u);
