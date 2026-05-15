@@ -85,6 +85,7 @@ function u(id) { return S.users.find(x => x.id === id); }
 function uName(id) { const x = u(id); return x ? x.name : '不明'; }
 function lt(id) { return S.lessonTypes.find(x => x.id === id); }
 function ltName(id) { const x = lt(id); return x ? x.name : '—'; }
+function lessonTypeName(l) { return (l.typeId ? ltName(l.typeId) : null) || l.customTypeName || '—'; }
 function store(id) { return S.stores.find(x => x.id === id); }
 function isInstructor(user) {
   return user && (user.role === 'instructor' || user.role === 'temp_instructor');
@@ -609,7 +610,7 @@ window.filterByInstructor = function(id) {
 };
 
 function lessonCard(l, showRegBtn = false) {
-  const type     = lt(l.typeId);
+  const typeName = lessonTypeName(l);
   const inst     = u(l.instructorId);
   const filled   = l.participants.length;
   const cap      = l.capacity;
@@ -639,7 +640,7 @@ function lessonCard(l, showRegBtn = false) {
     <div class="card-header">
       <div style="flex:1;min-width:0">
         <div class="card-title">
-          ${esc(type ? type.name : '—')}
+          ${esc(typeName)}
           ${isJoint ? '<span class="tag tag-dark" style="font-size:8px;vertical-align:middle;margin-left:6px">合同</span>' : ''}
         </div>
         <div class="card-meta">
@@ -662,6 +663,7 @@ function viewLessonDetail(p) {
   if (!l) return '<div class="page"><p>レッスンが見つかりません</p></div>';
 
   const type  = lt(l.typeId);
+  const tName = lessonTypeName(l);
   const inst  = u(l.instructorId);
   const tempI = l.tempInstructorId ? u(l.tempInstructorId) : null;
   const reg   = isRegistered(l);
@@ -687,7 +689,7 @@ function viewLessonDetail(p) {
     </div>
     <table style="width:100%;border-collapse:collapse">
       <tr><td class="text-xs text-accent" style="padding:8px 0 8px;width:90px">種類</td>
-          <td style="font-size:13px">${esc(type ? type.name : '—')}</td></tr>
+          <td style="font-size:13px">${esc(tName)}</td></tr>
       <tr style="border-top:1px solid var(--border)">
           <td class="text-xs text-accent" style="padding:8px 0">形式</td>
           <td style="font-size:13px">${esc(type ? type.format : '—')}&nbsp;&nbsp;<span class="tag">${esc(type ? type.level : '')}</span></td></tr>
@@ -819,8 +821,7 @@ window.addParticipant = async function(lessonId, userId, el) {
 window.addToGoogleCal = function(lessonId) {
   const l = S.lessons.find(x => x.id === lessonId);
   if (!l) return;
-  const type  = lt(l.typeId);
-  const title = encodeURIComponent((type ? type.name : 'レッスン') + ' — ' + uName(l.instructorId));
+  const title = encodeURIComponent(lessonTypeName(l) + ' — ' + uName(l.instructorId));
   const d     = l.date.replace(/-/g, '');
   const nextD = (() => {
     const dt = new Date(l.date + 'T00:00:00');
@@ -855,12 +856,19 @@ function viewPublishLesson(p) {
   let html = '<div class="page" style="padding-top:16px">';
 
   // Lesson type
+  const isOtherType = !!(template && !template.typeId && template.customTypeName);
+  const selectedTypeId = template ? (isOtherType ? '__other__' : (template.typeId || '')) : '';
   html += `<div class="form-group">
     <label class="form-label">レッスン種類</label>
-    <select class="form-select" id="f-type">
+    <select class="form-select" id="f-type" onchange="toggleCustomType(this.value)">
       <option value="">選択してください</option>
-      ${S.lessonTypes.map(t => `<option value="${t.id}" ${template && template.typeId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}
+      ${S.lessonTypes.map(t => `<option value="${t.id}" ${selectedTypeId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}
+      <option value="__other__" ${isOtherType?'selected':''}>その他（自由入力）</option>
     </select>
+    <input type="text" class="form-input" id="f-custom-type"
+      placeholder="種類を入力してください"
+      style="margin-top:8px;display:${isOtherType?'block':'none'}"
+      value="${isOtherType ? esc(template.customTypeName) : ''}">
   </div>`;
 
   // Date
@@ -915,20 +923,32 @@ function viewPublishLesson(p) {
   return html;
 }
 
-window.submitLesson = async function(editId) {
-  const typeId   = document.getElementById('f-type').value;
-  const tempId   = document.getElementById('f-temp').value;
-  const capacity = parseInt(document.getElementById('f-cap').value);
-  const deadline = document.getElementById('f-deadline').value;
-  const memo     = document.getElementById('f-memo').value;
+window.toggleCustomType = function(val, inputId) {
+  const el = document.getElementById(inputId || 'f-custom-type');
+  if (!el) return;
+  el.style.display = val === '__other__' ? 'block' : 'none';
+  if (val !== '__other__') el.value = '';
+};
 
-  if (!typeId) { toast('レッスン種類を選んでください', 'error'); return; }
+window.submitLesson = async function(editId) {
+  const rawTypeId  = document.getElementById('f-type').value;
+  const customText = (document.getElementById('f-custom-type')?.value || '').trim();
+  const tempId     = document.getElementById('f-temp').value;
+  const capacity   = parseInt(document.getElementById('f-cap').value);
+  const deadline   = document.getElementById('f-deadline').value;
+  const memo       = document.getElementById('f-memo').value;
+
+  if (!rawTypeId) { toast('レッスン種類を選んでください', 'error'); return; }
+  if (rawTypeId === '__other__' && !customText) { toast('種類を入力してください', 'error'); return; }
+
+  const typeId         = rawTypeId === '__other__' ? null : rawTypeId;
+  const customTypeName = rawTypeId === '__other__' ? customText : null;
 
   try {
     if (editId) {
       const date = document.getElementById('lesson-date-input').value;
       if (!date) { toast('日付を選んでください', 'error'); return; }
-      const body = { typeId, date, capacity, deadline, memo,
+      const body = { typeId, customTypeName, date, capacity, deadline, memo,
         instructorId: S.user.id, storeId: S.user.storeId, tempInstructorId: tempId || null };
       const updated = await api.put(`/lessons/${editId}`, body);
       S.lessons = S.lessons.map(l => l.id === editId ? { ...l, ...updated } : l);
@@ -937,7 +957,7 @@ window.submitLesson = async function(editId) {
       const dates = S.selectingDates;
       if (!dates.length) { toast('日付を選んでください', 'error'); return; }
       for (const date of dates) {
-        const body = { typeId, date, capacity, deadline, memo,
+        const body = { typeId, customTypeName, date, capacity, deadline, memo,
           instructorId: S.user.id, storeId: S.user.storeId, tempInstructorId: tempId || null };
         const created = await api.post('/lessons', body);
         S.lessons.push(created);
@@ -1304,10 +1324,14 @@ window.showPublishAdjModal = function(adjId) {
       </div>
       <div class="form-group">
         <label class="form-label">レッスン種類</label>
-        <select class="form-select" id="pub-type">
+        <select class="form-select" id="pub-type" onchange="toggleCustomType(this.value,'pub-custom-type')">
           <option value="">選択してください</option>
           ${S.lessonTypes.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}
+          <option value="__other__">その他（自由入力）</option>
         </select>
+        <input type="text" class="form-input" id="pub-custom-type"
+          placeholder="種類を入力してください"
+          style="margin-top:8px;display:none">
       </div>
       <div class="form-group">
         <label class="form-label">定員</label>
@@ -1331,20 +1355,25 @@ window.showPublishAdjModal = function(adjId) {
 };
 
 window.publishAdjustment = async function(adjId, modal) {
-  const date     = document.getElementById('pub-date').value;
-  const typeId   = document.getElementById('pub-type').value;
-  const capacity = parseInt(document.getElementById('pub-cap').value) || 5;
-  const deadline = document.getElementById('pub-deadline').value;
+  const date       = document.getElementById('pub-date').value;
+  const rawTypeId  = document.getElementById('pub-type').value;
+  const customText = (document.getElementById('pub-custom-type')?.value || '').trim();
+  const capacity   = parseInt(document.getElementById('pub-cap').value) || 5;
+  const deadline   = document.getElementById('pub-deadline').value;
 
-  if (!date)   { toast('日付を入力してください', 'error'); return; }
-  if (!typeId) { toast('レッスン種類を選んでください', 'error'); return; }
+  if (!date)     { toast('日付を入力してください', 'error'); return; }
+  if (!rawTypeId) { toast('レッスン種類を選んでください', 'error'); return; }
+  if (rawTypeId === '__other__' && !customText) { toast('種類を入力してください', 'error'); return; }
+
+  const typeId         = rawTypeId === '__other__' ? null : rawTypeId;
+  const customTypeName = rawTypeId === '__other__' ? customText : null;
 
   const adj = S.adjustments.find(a => a.id === adjId);
   if (!adj) return;
 
   try {
     const lesson = await api.post('/lessons', {
-      typeId, date, capacity, deadline,
+      typeId, customTypeName, date, capacity, deadline,
       instructorId: adj.instructorId,
       storeId: adj.storeId,
       tempInstructorId: null,
@@ -1547,7 +1576,6 @@ function adminTabLessons() {
   const sorted = [...storeFilteredLessons()].sort((a,b) => b.date.localeCompare(a.date));
   if (!sorted.length) return `<div class="empty-state"><div class="empty-state-icon">📋</div><p class="empty-state-text">レッスンがありません</p></div>`;
   return sorted.map(l => {
-    const type     = lt(l.typeId);
     const inst     = u(l.instructorId);
     const lStore   = S.stores.find(s => s.id === l.storeId);
     const parts    = l.participants.map(id => {
@@ -1560,7 +1588,7 @@ function adminTabLessons() {
       <div class="card-header">
         <div>
           <div class="card-title">
-            ${esc(type ? type.name : '—')}
+            ${esc(lessonTypeName(l))}
             ${isJoint ? '<span class="tag tag-dark" style="font-size:8px;vertical-align:middle;margin-left:6px">合同</span>' : ''}
           </div>
           <div class="card-meta">
